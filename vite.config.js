@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/media-risk-intelligence/', // GitHub Pages repository name
+  base: '/gowtham-capital/', // GitHub Pages repository name
   server: {
     port: 5173,
     // Proxy config — prevents CORS errors when calling government APIs
