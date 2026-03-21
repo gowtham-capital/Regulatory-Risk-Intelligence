@@ -1,8 +1,10 @@
 import axios from 'axios'
 
+import { config } from '../config.js'
+
 export async function fetchNews(companyName) {
   try {
-    const apiKey = import.meta.env.VITE_NEWS_API_KEY
+    const apiKey = config.newsApiKey
     
     if (!apiKey) {
       return {

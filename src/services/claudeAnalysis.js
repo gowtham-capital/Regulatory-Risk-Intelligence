@@ -1,3 +1,4 @@
+import { config } from '../config.js'
 import axios from 'axios'
 
 // ── COMPETITOR MAP ───────────────────────────────────────────────
@@ -1311,7 +1312,7 @@ Return your complete analysis as valid JSON only.
       {
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': import.meta.env.VITE_ANTHROPIC_API_KEY,
+          'x-api-key': config.anthropicApiKey,
           'anthropic-version': '2023-06-01',
           'anthropic-dangerous-direct-browser-access': 'true'
         },

@@ -1,8 +1,10 @@
 import axios from 'axios'
 
+import { config } from '../config.js'
+
 export async function fetchFCCProceedings(companyName) {
   try {
-    const apiKey = import.meta.env.VITE_FCC_API_KEY
+    const apiKey = config.fccApiKey
     
     if (!apiKey) {
       return {

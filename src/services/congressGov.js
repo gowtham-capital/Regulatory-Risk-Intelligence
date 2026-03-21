@@ -1,8 +1,10 @@
 import axios from 'axios'
 
+import { config } from '../config.js'
+
 export async function fetchCongressBills(companyName) {
   try {
-    const apiKey = import.meta.env.VITE_CONGRESS_GOV_API_KEY
+    const apiKey = config.congressGovApiKey
     
     if (!apiKey) {
       return {
