@@ -1293,16 +1293,20 @@ Return your complete analysis as valid JSON only.
 `.trim()
 
     // ── STEP 5: Call Claude API ───────────────────────────────────
-    // MUST use Vite proxy path — never call api.anthropic.com directly
-    // Direct calls are blocked by CORS from localhost
+    // Direct API call for production deployment
+    // CORS is handled by Anthropic API headers
 
     console.log('[ClaudeAnalysis] Sending to Claude — data points:', summary.totalDataPoints)
     console.time('[ClaudeAnalysis] Claude response time')
 
+    try {
+    // Use proxy in development, direct API in production with CORS handling
+    const apiUrl = import.meta.env.DEV ? '/api/anthropic/v1/messages' : 'https://api.anthropic.com/v1/messages'
+    
     const response = await axios.post(
-      '/api/anthropic/v1/messages',
+      apiUrl,
       {
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-3-5-sonnet-20241022',
         max_tokens: 2000,
         system: SYSTEM_PROMPT,
         messages: [
@@ -1346,6 +1350,16 @@ Return your complete analysis as valid JSON only.
   const brief = transformClaudeResponse(rawBrief, companyName, buckets, competitors)
 
   console.log('[ClaudeAnalysis] Transformed successfully')
+  return brief
+  } catch (apiErr) {
+    console.error('[ClaudeAnalysis] API Error:', apiErr)
+    if (apiErr.response) {
+      console.error('[ClaudeAnalysis] API Status:', apiErr.response.status)
+      console.error('[ClaudeAnalysis] API Response:', apiErr.response.data)
+    }
+    throw new Error(`Claude API failed: ${apiErr.response?.status || apiErr.message}`)
+  }
+
   console.log('[ClaudeAnalysis] Risk Score:', brief.overallRiskScore)
   console.log('[ClaudeAnalysis] Risk Level:', brief.riskLevel)
 
