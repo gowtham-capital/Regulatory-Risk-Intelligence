@@ -1293,16 +1293,27 @@ Return your complete analysis as valid JSON only.
 `.trim()
 
     // ── STEP 5: Call Claude API ───────────────────────────────────
-    // Direct API call for production deployment
-    // CORS is handled by Anthropic API headers
+    // Check if API key is available
+    if (!config.anthropicApiKey) {
+      const apiKey = prompt('Please enter your Anthropic API Key (sk-ant-api03-...):');
+      if (apiKey) {
+        config.anthropicApiKey = apiKey;
+        // Save to localStorage for future use
+        const currentKeys = JSON.parse(localStorage.getItem('apiKeys') || '{}');
+        currentKeys.VITE_ANTHROPIC_API_KEY = apiKey;
+        localStorage.setItem('apiKeys', JSON.stringify(currentKeys));
+      } else {
+        throw new Error('Anthropic API key is required for analysis');
+      }
+    }
 
+    // Use proxy in development, direct API in production with CORS handling
+    const apiUrl = import.meta.env.DEV ? '/api/anthropic/v1/messages' : 'https://api.anthropic.com/v1/messages'
+    
     console.log('[ClaudeAnalysis] Sending to Claude — data points:', summary.totalDataPoints)
     console.time('[ClaudeAnalysis] Claude response time')
 
     try {
-    // Use proxy in development, direct API in production with CORS handling
-    const apiUrl = import.meta.env.DEV ? '/api/anthropic/v1/messages' : 'https://api.anthropic.com/v1/messages'
-    
     const response = await axios.post(
       apiUrl,
       {

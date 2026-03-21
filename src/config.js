@@ -16,9 +16,21 @@ export const config = {
       this.newsApiKey = window.ENV.VITE_NEWS_API_KEY;
       this.anthropicApiKey = window.ENV.VITE_ANTHROPIC_API_KEY;
       this.legiscanApiKey = window.ENV.VITE_LEGISCAN_API_KEY;
+      
+      console.log('Config initialized with API keys:', {
+        congress: !!this.congressGovApiKey,
+        fcc: !!this.fccApiKey,
+        news: !!this.newsApiKey,
+        anthropic: !!this.anthropicApiKey,
+        legiscan: !!this.legiscanApiKey
+      });
+    } else {
+      console.warn('No window.ENV found - API keys not loaded');
     }
   }
 };
 
-// Initialize configuration
-config.init();
+// Auto-initialize when module loads
+if (typeof window !== 'undefined') {
+  config.init();
+}
