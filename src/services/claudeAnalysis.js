@@ -1,4 +1,3 @@
-import { config } from '../config.js'
 import axios from 'axios'
 
 // ── COMPETITOR MAP ───────────────────────────────────────────────
@@ -576,15 +575,68 @@ The response must pass JSON.parse() with zero modifications.
     },
     <second item — same structure>,
     <third item — same structure>
-  ]
+  ],
+
+  "executiveNarrative": "<4-6 sentences, 120-150 words. Complete regulatory exposure story: what is happening, why, which agencies are involved, what is accelerating, and what is the most urgent item. Written so a non-specialist can understand the full picture. Reference specific bills, proceedings, and enforcement actions by name.>",
+
+  "regulatoryBodyBreakdown": [
+    {
+      "body": "<FCC | FTC | Congress | Federal Register | Senate LDA | News>",
+      "riskLevel": "<CRITICAL | HIGH | MODERATE | LOW | NONE>",
+      "activeItems": "<integer count>",
+      "keyItem": "<most important proceeding/bill/action name>",
+      "assessment": "<1 sentence assessment of this body's activity>",
+      "nextDeadline": "<estimated next key date, or null>"
+    }
+  ],
+
+  "regulatoryTimeline": [
+    {
+      "event": "<specific event name — e.g. FCC Comment Period Closes>",
+      "source": "<which data source>",
+      "estimatedDate": "<YYYY-MM-DD>",
+      "dateConfidence": "<estimated | confirmed>",
+      "severity": "<CRITICAL | HIGH | MODERATE | LOW>"
+    }
+  ],
+
+  "financialImpact": {
+    "estimatedExposure": "<dollar range e.g. $50M-$200M>",
+    "exposureBasis": "<what precedent or calculation this is based on>",
+    "revenueAtRisk": "<percentage range e.g. 3-8% of US revenue>",
+    "complianceCostEstimate": "<dollar range for ongoing compliance>",
+    "precedentCase": "<most relevant enforcement precedent with outcome and year>"
+  },
+
+  "newsSentiment": {
+    "overall": "<NEGATIVE | NEUTRAL | POSITIVE>",
+    "sentimentScore": "<number -1.0 to 1.0>",
+    "topNarratives": ["<narrative 1>", "<narrative 2>"],
+    "coverageVolume": "<HIGH | MODERATE | LOW>"
+  },
+
+  "competitiveAdvantages": ["<specific advantage with reasoning>"],
+  "competitiveDisadvantages": ["<specific disadvantage with reasoning>"]
 }
 
 FIELD COUNT RULES — ENFORCE EXACTLY:
 - regulatoryRisks: exactly 3 items
-- strategicActions: exactly 3 items  
+- strategicActions: exactly 3 items
 - peers: exactly ${competitors.length} items
 - watchlist: exactly 3 items
+- regulatoryBodyBreakdown: one entry per active regulatory body (up to 6)
+- regulatoryTimeline: 3-5 milestone events with estimated dates
+- competitiveAdvantages: 1-3 items
+- competitiveDisadvantages: 1-3 items
 - Every field required — never omit or null any field
+
+ADDITIONAL ANALYSIS REQUIREMENTS:
+- executiveNarrative: Write a 4-6 sentence narrative (120-150 words) that tells the COMPLETE story of this company's regulatory exposure. Reference specific bills, proceedings, and enforcement actions by name. Written for a non-specialist audience.
+- regulatoryBodyBreakdown: Assess each government body's activity level and provide a 1-sentence assessment.
+- regulatoryTimeline: Provide 3-5 milestone events with estimated dates. Use "confirmed" for known deadlines and "estimated" for projected dates.
+- financialImpact: Estimate financial exposure using real enforcement precedent. Name the precedent case with year and outcome.
+- newsSentiment: Assess overall media sentiment direction, identify top 2 narratives, and rate coverage volume.
+- competitiveAdvantages/Disadvantages: List 1-3 specific advantages and disadvantages vs peers with reasoning.
 
 Be concise, specific, and actionable. Focus on US regulatory and geopolitical risks. All strategic actions must reference specific data points and include Activate Consulting enablement.`
   }
@@ -1145,6 +1197,15 @@ const transformClaudeResponse = (raw, companyName, buckets, competitors) => {
 
   const watchlist = watchRaw.map(normaliseWatchItem).filter(Boolean).slice(0, 3)
 
+  // ── Extract new fields (passthrough with safe defaults) ──
+  const executiveNarrative = get(raw, 'executiveNarrative', 'executive_narrative') || null
+  const regulatoryBodyBreakdown = getArr(raw, 'regulatoryBodyBreakdown', 'regulatory_body_breakdown')
+  const regulatoryTimeline = getArr(raw, 'regulatoryTimeline', 'regulatory_timeline')
+  const financialImpact = get(raw, 'financialImpact', 'financial_impact') || {}
+  const newsSentiment = get(raw, 'newsSentiment', 'news_sentiment') || {}
+  const competitiveAdvantages = getArr(raw, 'competitiveAdvantages', 'competitive_advantages')
+  const competitiveDisadvantages = getArr(raw, 'competitiveDisadvantages', 'competitive_disadvantages')
+
   return {
     overallRiskScore:  score,
     riskLevel:         level,
@@ -1152,11 +1213,18 @@ const transformClaudeResponse = (raw, companyName, buckets, competitors) => {
     regulatoryWindow:  extractWindow(raw),
     velocityIndicator: extractVelocity(raw, buckets),
     executiveSummary:  extractSummary(raw),
+    executiveNarrative,
     regulatoryRisks:   extractRisks(raw),
     strategicActions:  normalisedActions,
     competitiveContext: { summary: compSummary, peers: normalisedPeers },
     activateBenchmark: activateBenchmark,
-    watchlist: watchlist
+    watchlist: watchlist,
+    regulatoryBodyBreakdown,
+    regulatoryTimeline,
+    financialImpact,
+    newsSentiment,
+    competitiveAdvantages,
+    competitiveDisadvantages,
   }
 }
 
@@ -1293,32 +1361,17 @@ Return your complete analysis as valid JSON only.
 `.trim()
 
     // ── STEP 5: Call Claude API ───────────────────────────────────
-    // Check if API key is available
-    if (!config.anthropicApiKey) {
-      const apiKey = prompt('Please enter your Anthropic API Key (sk-ant-api03-...):');
-      if (apiKey) {
-        config.anthropicApiKey = apiKey;
-        // Save to localStorage for future use
-        const currentKeys = JSON.parse(localStorage.getItem('apiKeys') || '{}');
-        currentKeys.VITE_ANTHROPIC_API_KEY = apiKey;
-        localStorage.setItem('apiKeys', JSON.stringify(currentKeys));
-      } else {
-        throw new Error('Anthropic API key is required for analysis');
-      }
-    }
+    // MUST use Vite proxy path — never call api.anthropic.com directly
+    // Direct calls are blocked by CORS from localhost
 
-    // Use proxy in development, direct API in production with CORS handling
-    const apiUrl = import.meta.env.DEV ? '/api/anthropic/v1/messages' : 'https://api.anthropic.com/v1/messages'
-    
     console.log('[ClaudeAnalysis] Sending to Claude — data points:', summary.totalDataPoints)
     console.time('[ClaudeAnalysis] Claude response time')
 
-    try {
     const response = await axios.post(
-      apiUrl,
+      '/api/anthropic/v1/messages',
       {
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 2000,
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
         system: SYSTEM_PROMPT,
         messages: [
           { role: 'user', content: userMessage }
@@ -1327,7 +1380,7 @@ Return your complete analysis as valid JSON only.
       {
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': config.anthropicApiKey,
+          'x-api-key': import.meta.env.VITE_ANTHROPIC_API_KEY,
           'anthropic-version': '2023-06-01',
           'anthropic-dangerous-direct-browser-access': 'true'
         },
@@ -1361,16 +1414,6 @@ Return your complete analysis as valid JSON only.
   const brief = transformClaudeResponse(rawBrief, companyName, buckets, competitors)
 
   console.log('[ClaudeAnalysis] Transformed successfully')
-  return brief
-  } catch (apiErr) {
-    console.error('[ClaudeAnalysis] API Error:', apiErr)
-    if (apiErr.response) {
-      console.error('[ClaudeAnalysis] API Status:', apiErr.response.status)
-      console.error('[ClaudeAnalysis] API Response:', apiErr.response.data)
-    }
-    throw new Error(`Claude API failed: ${apiErr.response?.status || apiErr.message}`)
-  }
-
   console.log('[ClaudeAnalysis] Risk Score:', brief.overallRiskScore)
   console.log('[ClaudeAnalysis] Risk Level:', brief.riskLevel)
 

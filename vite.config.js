@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  plugins: [react()],
-  base: '/gowtham-capital/', // GitHub Pages repository name
+  plugins: [react(), tailwindcss()],
   server: {
     port: 5173,
     // Proxy config — prevents CORS errors when calling government APIs
@@ -45,23 +45,6 @@ export default defineConfig({
         target: 'https://api.anthropic.com',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/anthropic/, '')
-      }
-    }
-  },
-  build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    sourcemap: true,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('react') || id.includes('react-dom')) {
-            return 'vendor'
-          }
-          if (id.includes('react-router')) {
-            return 'router'
-          }
-        }
       }
     }
   }
