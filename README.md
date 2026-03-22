@@ -132,13 +132,28 @@ Create a `.env` file with your API keys:
 
 ```env
 VITE_CLAUDE_API_KEY=your_claude_api_key
-VITE_CONGRESS_API_KEY=your_congress_api_key
-VITE_FTC_API_KEY=your_ftc_api_key
+VITE_CONGRESS_GOV_API_KEY=your_congress_api_key
 VITE_FCC_API_KEY=your_fcc_api_key
-VITE_SENATE_API_KEY=your_senate_api_key
-VITE_FEDERAL_REGISTER_API_KEY=your_federal_register_api_key
 VITE_NEWS_API_KEY=your_news_api_key
+VITE_ANTHROPIC_API_KEY=your_claude_api_key
+VITE_LEGISCAN_API_KEY=your_legiscan_api_key
 ```
+
+### **For GitHub Pages Deployment (Automatic)**
+
+The GitHub Pages deployment automatically uses GitHub Secrets. To set up:
+
+1. Go to your repository: https://github.com/gowtham-capital/Regulatory-Risk-Intelligence
+2. Click **Settings** → **Secrets and variables** → **Actions**
+3. Add these repository secrets:
+   - `VITE_CLAUDE_API_KEY`
+   - `VITE_CONGRESS_GOV_API_KEY` 
+   - `VITE_FCC_API_KEY`
+   - `VITE_NEWS_API_KEY`
+   - `VITE_ANTHROPIC_API_KEY`
+   - `VITE_LEGISCAN_API_KEY`
+
+The GitHub Actions workflow will automatically use these secrets for deployment.
 
 ---
 
