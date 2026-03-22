@@ -230,6 +230,26 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
+## 🌐 Share & Access
+
+### **GitHub Repository**
+- **Main Repository**: https://github.com/gowtham-capital/Regulatory-Risk-Intelligence
+- **Live Demo**: https://gowtham-capital.github.io/Regulatory-Risk-Intelligence/ (available after GitHub Pages deployment)
+
+### **Easy Sharing**
+- **Clone**: `git clone https://github.com/gowtham-capital/Regulatory-Risk-Intelligence.git`
+- **Fork**: Click "Fork" on GitHub to create your own copy
+- **Star**: Click "⭐ Star" to show your support
+- **Share**: Use the repository URL to share with colleagues
+
+### **Quick Access**
+- **View Source**: Browse the complete source code on GitHub
+- **Read Documentation**: Comprehensive README with setup instructions
+- **Download**: Download as ZIP file for offline use
+- **Report Issues**: Use GitHub Issues for bug reports and feature requests
+
+---
+
 **Built for businesses that need to stay ahead of regulatory risks before they impact operations.**
 
 > *"The regulatory risk exposure can be detected months in advance."*
