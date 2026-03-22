@@ -112,8 +112,8 @@ The system monitors 6 government sources continuously:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/regulatory-risk-intel.git
-cd regulatory-risk-intel
+git clone https://github.com/gowtham-capital/Regulatory-Risk-Intelligence.git
+cd Regulatory-Risk-Intelligence
 
 # Install dependencies
 npm install
@@ -225,7 +225,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 📞 Need Help?
 
-- **Issues**: [GitHub Issues](https://github.com/your-username/regulatory-risk-intel/issues)
+- **Issues**: [GitHub Issues](https://github.com/gowtham-capital/Regulatory-Risk-Intelligence/issues)
 - **Support**: support@regulatory-risk-intel.com
 
 ---
