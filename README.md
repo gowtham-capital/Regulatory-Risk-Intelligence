@@ -104,7 +104,7 @@ The system monitors 6 government sources continuously:
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 20.19+ (required for Vite 8.0+)
 - npm or yarn package manager
 - API keys for Claude and government data sources
 
